@@ -239,7 +239,7 @@ local function runRotation()
         -- variable,name=energy_regen_combined,value=energy.regen+poisoned_bleeds*7%(2*spell_haste)
         local energyRegenCombined = energyRegen + (debuff.garrote.count() + debuff.rupture.count()) * 7 / (2 * (GetHaste()/100))
         -- variable,name=single_target,value=spell_targets.fan_of_knives<2
-        local singleTarget = ((mode.rotation == 1 and #enemies.yards8 < getOptionValue("Fan of Knives")) or (mode.rotation == 3 and #enemies.yards8 > 0))
+        local singleTarget = ((mode.rotation == 1 and #enemies.yards10 < 2) or (mode.rotation == 3 and #enemies.yards10 > 0))
         -- variable,name=use_filler,value=combo_points.deficit>1|energy.deficit<=25+variable.energy_regen_combined|!variable.single_target
         local useFiller = comboDeficit > 1 or energyDeficit <= 25 + energyRegenCombined or not singleTarget
 
@@ -294,7 +294,7 @@ local function runRotation()
         local function autoStealth()
             for i = 1, #enemies.yards20nc do
                 local thisUnit = enemies.yards20nc[i]
-                if GetUnitReaction(thisUnit,"player") < 4 then return true end
+                if UnitReaction(thisUnit,"player") < 4 then return true end
             end
             return false
         end
@@ -341,7 +341,7 @@ local function runRotation()
                 end
             end
         -- Tricks of the Trade
-            if isChecked("Tricks of the Trade on Focus") and cast.able.tricksOfTheTrade("focus") and inCombat and UnitExists("focus") and GetUnitIsFriend("focus") then
+            if isChecked("Tricks of the Trade on Focus") and cast.able.tricksOfTheTrade("focus") and inCombat and UnitExists("focus") and UnitIsFriend("focus") then
                 if cast.tricksOfTheTrade("focus") then return end
             end
         end -- End Action List - Extras
@@ -447,7 +447,7 @@ local function runRotation()
                     if getOptionValue("Marked For Death") == 2 then
                         for i = 1, #enemies.yards30 do
                             local thisUnit = enemies.yards30[i]
-                            if (multidot or (GetUnitIsUnit(thisUnit,units.dyn5) and not multidot)) then
+                            if (multidot or (UnitIsUnit(thisUnit,units.dyn5) and not multidot)) then
                                 if ttd(thisUnit) < comboDeficit * 1.5 or comboDeficit >= comboMax then
                                     if cast.markedForDeath(thisUnit) then return end
                                 end
@@ -777,14 +777,18 @@ local function runRotation()
             if not inCombat and not (IsFlying() or IsMounted()) then
         -- Apply Poison
                 -- apply_poison
-                if getOptionValue("Lethal Poison") == 1 and buff.deadlyPoison.remain() < 300 and not cast.last.deadlyPoison() then
-                    if cast.deadlyPoison("player") then return end
+                if isChecked("Lethal Poison") then
+                    if getOptionValue("Lethal Poison") == 1 and buff.deadlyPoison.remain() < 300 and not cast.last.deadlyPoison() then
+                        if cast.deadlyPoison("player") then return end
+                    end
+                    if getOptionValue("Lethal Poison") == 2 and buff.woundPoison.remain() < 300 and not cast.last.woundPoison() then
+                        if cast.woundPoison("player") then return end
+                    end
                 end
-                if getOptionValue("Lethal Poison") == 2 and buff.woundPoison.remain() < 300 and not cast.last.woundPoison() then
-                    if cast.woundPoison("player") then return end
-                end
-                if getOptionValue("Non-Lethal Poison") == 1 and buff.cripplingPoison.remain() < 300 and not cast.last.cripplingPoison() then
-                    if cast.cripplingPoison("player") then return end
+                if isChecked("Non-Lethal Poison") then
+                    if getOptionValue("Non-Lethal Poison") == 1 and buff.cripplingPoison.remain() < 300 and not cast.last.cripplingPoison() then
+                        if cast.cripplingPoison("player") then return end
+                    end
                 end
         -- Stealth
                 -- stealth

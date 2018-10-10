@@ -9,7 +9,13 @@ function br.ui:createConfigWindow()
         -- General
         section = br.ui:createSection(br.ui.window.config, "General")
         br.ui:createCheckbox(section, "Auto Delay", "Check to dynamically change update rate based on current FPS.")
-        br.ui:createSpinnerWithout(section, "Bot Update Rate", 0.1, 0.0, 1.0, 0.01, "Adjust the update rate of Bot operations. Increase to improve FPS but may cause reaction delays. Default: 0.1")
+        br.ui:createSpinnerWithout(section, "FindEnemy() Rate", 0.1, 0.0, 1.0, 0.01, "FindEnemy() rate")
+        br.ui:createSpinnerWithout(section, "cacheOM() rate", 0.1, 0.0, 1.0, 0.01, "cacheOM() rate")
+        br.ui:createSpinnerWithout(section, "getOMUnits() rate", 0.1, 0.0, 1.0, 0.01, "getOMUnits() rate")
+        br.ui:createSpinnerWithout(section, "Bot Update Rate", 0.1, 0.0, 1.0, 0.01, "Bot Update Rate")
+
+        
+
         -- br.ui:createSpinnerWithout(section, "Dynamic Target Rate", 0.5, 0.5, 2.0, 0.01, "Adjusts the rate at which enemies are cycled for new dynamic targets. Default: 0.5")
         -- As you should use the toggle to stop, i (defmaster) just activated this toggle default and made it non interactive
         local startStop = br.ui:createCheckbox(section, "Start/Stop BadRotations", "Toggle this option from the Toggle Bar (Shift Left Click on the Minimap Icon.");
@@ -55,7 +61,7 @@ function br.ui:createConfigWindow()
         -- Healing Engine
         section = br.ui:createSection(br.ui.window.config, "Healing Engine")
         br.ui:createCheckbox(section, "HE Active", "Uncheck to disable Healing Engine.\nCan improves FPS if you dont rely on Healing Engine.")
-        --br.ui:createCheckbox(section, "Disable Object Manager", "Check to disable OM. Will disable dynamic targetting. Will prevent all spells that require OM from working correctly.")
+        br.ui:createCheckbox(section, "Disable Object Manager", "Check to disable OM. Will disable dynamic targetting. Will prevent all spells that require OM from working correctly.")
         br.ui:createCheckbox(section, "Heal Pets", "Check this to Heal Pets.")
         br.ui:createDropdown(section, "Special Heal", {"Target", "T/M", "T/M/F", "T/F"}, 1, "Check this to Heal Special Whitelisted Units.", "Choose who you want to Heal.")
         br.ui:createCheckbox(section, "Sorting with Role", "Sorting with Role")
@@ -68,7 +74,7 @@ function br.ui:createConfigWindow()
         br.ui:createSpinner(section, "Overhealing Cancel", 95, nil, nil, nil, "Set Desired Threshold at which you want to prevent your own casts. CURRENTLY NOT IMPLEMENTED!")
         --healingDebug = br.ui:createCheckbox(section, "Healing Debug", "Check to display Healing Engine Debug.")
         --br.ui:createSpinner(section, "Debug Refresh", 500, 0, 1000, 25, "Set desired Healing Engine Debug Table refresh for rate in ms.")
-        br.ui:createSpinner(section, "Dispel delay", 1.5, 0, 5, 0.1, "Set desired dispel delay in seconds of debuff duration.\n|cffFF0000Will randomise around the value you set.")
+        br.ui:createSpinner(section, "Dispel delay", 15, 5, 90, 5, "Set desired dispel delay in % of debuff duration.\n|cffFF0000Will randomise around the value you set.")
         br.ui:createCheckbox(section, "Healer Line of Sight Indicator", "Draws a line to healers. Green In Line of Sight / Red Not In Line of Sight")
         br.ui:checkSectionState(section)
     end
@@ -82,7 +88,6 @@ function br.ui:createConfigWindow()
         br.ui:createCheckbox(section, "Disenchant", "Disenchant Cata blues/greens.")
         br.ui:createCheckbox(section, "Leather Scraps", "Combine leather scraps.")
         br.ui:createCheckbox(section, "Lockboxes", "Unlock Lockboxes.")
-        br.ui:createCheckbox(section, "Quaking Helper", "Auto cancel channeling and block casts during mythic+ affix quaking")
         br.ui:createCheckbox(section, "Debug Timers", "Useless to users, for Devs.")
         br.ui:checkSectionState(section)
     end

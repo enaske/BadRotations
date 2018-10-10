@@ -249,12 +249,9 @@ local function runRotation()
 		end
 
         local function autoProwl()
-            if #enemies.yards20nc > 0 then
-                for i = 1, #enemies.yards20nc do
-                    local thisUnit = enemies.yards20nc[i]
-                    -- local react = GetUnitReaction(thisUnit,"player") or 10
-                    if UnitIsEnemy(thisUnit,"player") and UnitCanAttack(thisUnit,"player") then return true end
-                end
+            for i = 1, #enemies.yards20nc do
+                local thisUnit = enemies.yards20nc[i]
+                if UnitReaction(thisUnit,"player") < 4 then return true end
             end
             return false
         end
@@ -467,24 +464,24 @@ local function runRotation()
 		--Revive/Rebirth
 				if isChecked("Rebirth") and inCombat and cast.able.rebirth() then
 					if getOptionValue("Rebirth - Target")==1
-                        and UnitIsPlayer("target") and UnitIsDeadOrGhost("target") and GetUnitIsFriend("target","player")
+                        and UnitIsPlayer("target") and UnitIsDeadOrGhost("target") and UnitIsFriend("target","player")
                     then
 						if cast.rebirth("target","dead") then return true end
 					end
 					if getOptionValue("Rebirth - Target")==2
-                        and UnitIsPlayer("mouseover") and UnitIsDeadOrGhost("mouseover") and GetUnitIsFriend("mouseover","player")
+                        and UnitIsPlayer("mouseover") and UnitIsDeadOrGhost("mouseover") and UnitIsFriend("mouseover","player")
                     then
 						if cast.rebirth("mouseover","dead") then return true end
 					end
 				end
 				if isChecked("Revive") and not inCombat and cast.able.revive() then
 					if getOptionValue("Revive - Target")==1
-                        and UnitIsPlayer("target") and UnitIsDeadOrGhost("target") and GetUnitIsFriend("target","player")
+                        and UnitIsPlayer("target") and UnitIsDeadOrGhost("target") and UnitIsFriend("target","player")
                     then
 						if cast.revive("target","dead") then return true end
 					end
 					if getOptionValue("Revive - Target")==2
-                        and UnitIsPlayer("mouseover") and UnitIsDeadOrGhost("mouseover") and GetUnitIsFriend("mouseover","player")
+                        and UnitIsPlayer("mouseover") and UnitIsDeadOrGhost("mouseover") and UnitIsFriend("mouseover","player")
                     then
 						if cast.revive("mouseover","dead") then return true end
 					end
@@ -497,7 +494,7 @@ local function runRotation()
 					if getOptionValue("Remove Corruption - Target")==2 and canDispel("target",spell.removeCorruption) then
 						if cast.removeCorruption("target") then return true end
 					end
-					if getOptionValue("Remove Corruption - Target")==3 and GetUnitIsFriend("mouseover") and canDispel("mouseover",spell.removeCorruption) then
+					if getOptionValue("Remove Corruption - Target")==3 and UnitIsFriend("mouseover") and canDispel("mouseover",spell.removeCorruption) then
 						if cast.removeCorruption("mouseover") then return true end
 					end
 				end
@@ -991,7 +988,7 @@ local function runRotation()
             if (cast.pool.rip() or cast.able.rip()) and (buff.savageRoar.exists() or not talent.savageRoar) and debuff.rip.count() < 5 then
                 for i = 1, #enemies.yards5 do
                     local thisUnit = enemies.yards5[i]
-                    if (multidot or (GetUnitIsUnit(thisUnit,units.dyn5) and not multidot)) then
+                    if (multidot or (UnitIsUnit(thisUnit,units.dyn5) and not multidot)) then
                         if getDistance(thisUnit) < 5 then
                             if (not debuff.rip.exists(thisUnit) or debuff.rip.refresh(thisUnit) and (thp(thisUnit) > 25 and not talent.sabertooth)
                                 or (debuff.rip.remain(thisUnit) <= ripDuration * 0.8 and debuff.rip.calc() > debuff.rip.applied(thisUnit))) and (ttd(thisUnit) > 8 or isDummy(thisUnit))
@@ -1015,18 +1012,14 @@ local function runRotation()
                 end
             end
         -- Maim
-            -- pool_resource,for_next=1
-            -- maim,if=buff.iron_jaws.up
-            if (cast.pool.maim() or cast.able.maim()) and (buff.ironJaws.exists()) then
-                if cast.pool.main() then ChatOverlay("Pooling For Maim") return true end
-                if cast.able.maim() then 
-                    if cast.maim() then return true end
-                end
+            -- maim,if=buff.fiery_red_maimers.up
+            if cast.able.maim() and (buff.fieryRedMaimers.exists()) then
+                if cast.maim() then return true end
             end
         -- Ferocious Bite
             -- ferocious_bite,max_energy=1
             if cast.able.ferociousBite() and fbMaxEnergy and (buff.savageRoar.remain() >= 12 or not talent.savageRoar)
-                and (not debuff.rip.refresh(units.dyn5) or thp(units.dyn5) <= 25 or ferociousBiteFinish() or level < 20 or (ttd(units.dyn5) <= 8 and debuff.rip.refresh(units.dyn5)))
+                and (not debuff.rip.refresh(units.dyn5) or thp(units.dyn5) <= 25 or ferociousBiteFinish() or level < 20)-- or ttd(units.dyn5) <= 8)
             then
                 if cast.ferociousBite() then return true end
             end
@@ -1064,7 +1057,7 @@ local function runRotation()
             if cast.able.rip() and debuff.rip.count() < 5 then
                 for i = 1, #enemies.yards5 do
                     local thisUnit = enemies.yards5[i]
-                    if (multidot or (GetUnitIsUnit(thisUnit,units.dyn5) and not multidot)) then
+                    if (multidot or (UnitIsUnit(thisUnit,units.dyn5) and not multidot)) then
                         if debuff.rip.refresh(thisUnit) and (buff.savageRoar.exists() or not talent.savageRoar) and not talent.sabertooth
                             and ttd(thisUnit) - debuff.rip.remain(thisUnit) > 2 * 2
                         then
@@ -1157,7 +1150,7 @@ local function runRotation()
         -- Thrash
             -- pool_resource,for_next=1
             -- thrash_cat,if=refreshable&(spell_targets.thrash_cat>2)
-            if (cast.pool.thrash() or cast.able.thrash()) then --and multidot then
+            if (cast.pool.thrash() or cast.able.thrash()) and multidot then
                 if (not debuff.thrash.exists(units.dyn8AOE) or debuff.thrash.refresh(units.dyn8AOE)) and ((mode.rotation == 1 and #enemies.yards8 > 2) or mode.rotation == 2) then
                     if cast.pool.thrash() then ChatOverlay("Pooling For Thrash: "..#enemies.yards8.." targets") return true end
                     if cast.able.thrash() then
@@ -1172,7 +1165,7 @@ local function runRotation()
             if (cast.pool.rake() or cast.able.rake()) and debuff.rake.count() < 3 then
                 for i = 1, #enemies.yards5 do
                     local thisUnit = enemies.yards5[i]
-                    if (multidot or (GetUnitIsUnit(thisUnit,units.dyn5) and not multidot)) and (ttd(thisUnit) > 4 or isDummy(thisUnit)) then
+                    if (multidot or (UnitIsUnit(thisUnit,units.dyn5) and not multidot)) and (ttd(thisUnit) > 4 or isDummy(thisUnit)) then
                         if (not debuff.rake.exists(thisUnit) or (not talent.bloodtalons and debuff.rake.refresh(thisUnit)))
                             or (talent.bloodtalons and buff.bloodtalons.exists() and debuff.rake.remain(thisUnit) <= 7 and debuff.rake.calc() > debuff.rake.applied(thisUnit) * 0.85)
                         then
@@ -1187,7 +1180,7 @@ local function runRotation()
         -- Moonfire
             -- moonfire_cat,if=buff.bloodtalons.up&buff.predatory_swiftness.down&combo_points<5
             if cast.able.moonfireFeral() and talent.lunarInspiration and debuff.moonfireFeral.count() < 5 then
-                if buff.bloodtalons.exists() and not buff.predatorySwiftness.exists() and comboPoints < 5 then
+                if buff.bloodtalons.exists() and not buff.predatorySwiftness.exists() and combo < 5 then
                     if cast.moonfireFeral() then return end
                 end
             end
@@ -1214,7 +1207,7 @@ local function runRotation()
             if cast.able.moonfireFeral() and talent.lunarInspiration and debuff.moonfireFeral.count() < 5 then
                 for i = 1, #enemies.yards40 do
                     local thisUnit = enemies.yards40[i]
-                    if multidot or (GetUnitIsUnit(thisUnit,units.dyn5) and not multidot) then
+                    if multidot or (UnitIsUnit(thisUnit,units.dyn5) and not multidot) then
                         if debuff.moonfireFeral.refresh(thisUnit) then --or (isDummy(thisUnit) and getDistance(thisUnit) < 8) then
                            if cast.moonfireFeral(thisUnit) then return true end
                         end
@@ -1223,12 +1216,10 @@ local function runRotation()
             end
         -- Thrash
             -- pool_resource,for_next=1
-            -- thrash_cat,if=refreshable&((variable.use_thrash=2&(!buff.incarnation.up|azerite.wild_fleshrending.enabled))|spell_targets.thrash_cat>1)
-            -- thrash_cat,if=refreshable&variable.use_thrash=1&buff.clearcasting.react&(!buff.incarnation.up|azerite.wild_fleshrending.enabled)
-            if (cast.pool.thrash() or cast.able.thrash()) --[[and multidot]] and debuff.thrash.refresh(units.dyn8AOE) then
-                if (useThrash == 2 and (not buff.incarnationKingOfTheJungle.exists() or trait.wildFleshrending.active())) or ((mode.rotation == 1 and #enemies.yards8 > 1) or (mode.rotation == 2 and #enemies.yards8 > 0)) 
-                    or (useThrash == 1 and buff.clearcasting.exists() and (not buff.incarnationKingOfTheJungle.exists() or trait.wildFleshrending.active())) 
-                then
+            -- thrash_cat,if=refreshable&(variable.use_thrash=2|spell_targets.thrash_cat>1)
+            -- thrash_cat,if=refreshable&variable.use_thrash=1&buff.clearcasting.react
+            if (cast.pool.thrash() or cast.able.thrash()) and multidot and (not debuff.thrash.exists(units.dyn8AOE) or debuff.thrash.refresh(units.dyn8AOE)) then
+                if useThrash == 2 or ((mode.rotation == 1 and #enemies.yards8 > 1) or (mode.rotation == 2 and #enemies.yards8 > 0)) or (useThrash == 1 and buff.clearcasting.exists()) then
                     if cast.pool.thrash() and not buff.clearcasting.exists() then ChatOverlay("Pooling For Thrash") return true end
                     if cast.able.thrash() or buff.clearcasting.exists() then
                         if cast.thrash("player","aoe") then return true end
@@ -1238,7 +1229,7 @@ local function runRotation()
         -- Swipe
             -- pool_resource,for_next=1
             -- swipe_cat,if=spell_targets.swipe_cat>1
-            if (cast.pool.swipe() or cast.able.swipe()) and not talent.brutalSlash --and multidot
+            if (cast.pool.swipe() or cast.able.swipe()) and not talent.brutalSlash and multidot
                 and ((mode.rotation == 1 and #enemies.yards8 > 1) or (mode.rotation == 2 and #enemies.yards8 > 0))
             then
                 if cast.pool.swipe() then ChatOverlay("Pooling For Swipe") return true end
@@ -1252,8 +1243,8 @@ local function runRotation()
                 if cast.shred() then return end
             end
         -- Moonfire
-            -- moonfire_cat,if=azerite.power_of_the_moon.enabled&!buff.incarnation.up
-            -- if cast.able.moonfire() and talent.lunarInspiration and trait.powerOfTheMoon.active() and not buff.incarnationKingOfTheJungle.exists() then
+            -- moonfire_cat,if=azerite.power_of_the_moon.enabled
+            -- if cast.able.moonfire() and talent.lunarInspiration and trait.powerOfTheMoon.active() then
             --     if cast.moonfire() then return end
             -- end
         -- Shred
@@ -1318,7 +1309,7 @@ local function runRotation()
             if cast.able.rake() and debuff.rake.count() < 3 then
                 for i = 1, #enemies.yards5 do
                     local thisUnit = enemies.yards5[i]
-                    if (multidot or (GetUnitIsUnit(thisUnit,units.dyn5) and not multidot)) then
+                    if (multidot or (UnitIsUnit(thisUnit,units.dyn5) and not multidot)) then
                         if not talent.bloodtalons and debuff.rake.refresh(thisUnit) then
                             if cast.rake(thisUnit) then return true end
                         end
@@ -1345,7 +1336,7 @@ local function runRotation()
             if cast.able.moonfireFeral() and talent.lunarInspiration and debuff.moonfireFeral.count() < 5 then
                 for i = 1, #enemies.yards40 do
                     local thisUnit = enemies.yards40[i]
-                    if multidot or (GetUnitIsUnit(thisUnit,units.dyn5) and not multidot) then
+                    if multidot or (UnitIsUnit(thisUnit,units.dyn5) and not multidot) then
                         if (debuff.moonfireFeral.refresh(thisUnit) --[[or (isDummy(thisUnit) and getDistance(thisUnit) < 8)]]) and debuff.rake.exists(thisUnit) and (ttd(thisUnit) > 10 or (isDummy(thisUnit) and getDistance(thisUnit) < 8)) then
                            if cast.moonfireFeral(thisUnit) then return true end
                         end
@@ -1354,14 +1345,14 @@ local function runRotation()
             end
         -- Thrash
             -- if TargetsInRadius(Thrash) >= 3 and CanRefreshDot(ThrashBleedFeral)
-            if cast.able.thrash() then --and multidot then
+            if cast.able.thrash() and multidot then
                 if ((mode.rotation == 1 and #enemies.yards8 >= 3) or (mode.rotation == 2 and #enemies.yards8 > 0)) and debuff.thrash.refresh(units.dyn8AOE) then
                     if cast.thrash("player","aoe") then return true end
                 end
             end
         -- Swipe
             -- if TargetsInRadius(Swipe) >= 3 and not CanRefreshDot(ThrashBleedFeral)
-            if cast.able.swipe() and not talent.brutalSlash --[[and multidot]] and not debuff.thrash.refresh(units.dyn8)
+            if cast.able.swipe() and not talent.brutalSlash and multidot and not debuff.thrash.refresh(units.dyn8)
                 and ((mode.rotation == 1 and #enemies.yards8 >= 3) or (mode.rotation == 2 and #enemies.yards8 > 0))
             then
                 if cast.swipe("player","aoe") then return true end

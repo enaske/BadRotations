@@ -309,7 +309,7 @@ local function runRotation()
         local function getPocketPicked()
             for i = 1, #enemies.yards10nc do
                 local thisUnit = enemies.yards10nc[i]
-                if (GetUnitIsUnit(thisUnit,"target") or mode.pickPocket == 2) and mode.pickPocket ~= 3 then
+                if (UnitIsUnit(thisUnit,"target") or mode.pickPocket == 2) and mode.pickPocket ~= 3 then
                     if not isPicked(thisUnit) and not isDummy(thisUnit) then
                         if mode.pickPocket == 2 and debuff.sap.remain(thisUnit) < 1 then
                             if cast.sap(thisUnit) then return end
@@ -335,7 +335,7 @@ local function runRotation()
         local function autoStealth()
             for i = 1, #enemies.yards20nc do
                 local thisUnit = enemies.yards20nc[i]
-                if GetUnitReaction(thisUnit,"player") < 4 then return true end
+                if UnitReaction(thisUnit,"player") < 4 then return true end
             end
             return false
         end
@@ -361,7 +361,7 @@ local function runRotation()
                 getPocketPicked()
             end
         -- Tricks of the Trade
-            if isChecked("Tricks of the Trade on Focus") and cast.able.tricksOfTheTrade("focus") and inCombat and UnitExists("focus") and GetUnitIsFriend("focus") then
+            if isChecked("Tricks of the Trade on Focus") and cast.able.tricksOfTheTrade("focus") and inCombat and UnitExists("focus") and UnitIsFriend("focus") then
                 if cast.tricksOfTheTrade("focus") then return end
             end
         end -- End Action List - Extras
@@ -569,7 +569,7 @@ local function runRotation()
             if isChecked("Nightblade Multidot") and cast.able.nightblade() then
                 for i=1, #enemies.yards5 do
                     local thisUnit = enemies.yards5[i]
-                    if (multidot or (GetUnitIsUnit(thisUnit,units.dyn10) and not multidot)) then
+                    if (multidot or (UnitIsUnit(thisUnit,units.dyn10) and not multidot)) then
                         if (#enemies.yards10 >= 2 and (talent.secretTechnique or trait.nightsVengeance.active() or #enemies.yards10 <= 5)
                             and not buff.shadowDance.exists() and ttd(thisUnit) >= (5 + (2 * combo)) and debuff.nightblade.refresh(thisUnit))
                         then

@@ -98,8 +98,8 @@ end
 -- 	local obj1ID = GetObjectID(Unit1)
 -- 	local obj2ID = GetObjectID(Unit2)
 -- 	if skipLoSTable[obj1ID] ~= nil or skipLoSTable[obj2ID] ~= nil then return true end
--- 	if (GetUnitIsUnit(Unit1,"player") or (GetObjectExists(Unit1) and GetUnitIsVisible(Unit1)))
--- 		and (GetUnitIsUnit(Unit2,"player") or (GetObjectExists(Unit2) and GetUnitIsVisible(Unit2)))
+-- 	if (UnitIsUnit(Unit1,"player") or (GetObjectExists(Unit1) and GetUnitIsVisible(Unit1)))
+-- 		and (UnitIsUnit(Unit2,"player") or (GetObjectExists(Unit2) and GetUnitIsVisible(Unit2)))
 -- 	then
 -- 		local X1,Y1,Z1 = GetObjectPosition(Unit1)
 -- 		local X2,Y2,Z2 = GetObjectPosition(Unit2)
@@ -245,13 +245,17 @@ function isLongTimeCCed(Unit)
 		return false
 	end
 	local longTimeCC = br.lists.longCC
-	for i=1,40 do
-		local debuffSpellID = select(10, UnitDebuff(Unit,i))
-		if debuffSpellID == nil then return false end
-		if longTimeCC[tonumber(debuffSpellID)] == true then
+	for k, v in pairs(longTimeCC) do
+		if UnitDebuffID(Unit,longTimeCC[k])~=nil then
 			return true
 		end
 	end
+	-- for i=1,#longTimeCC do
+	-- 	--local checkCC=longTimeCC[i]
+	-- 	if UnitDebuffID(Unit,longTimeCC[i])~=nil then
+	-- 		return true
+	-- 	end
+	-- end
 	return false
 end
 -- if isLooting() then
@@ -362,17 +366,16 @@ function enemyListCheck(Unit)
 
 	return GetObjectExists(Unit) and not UnitIsDeadOrGhost(Unit) and UnitInPhase(Unit) and UnitCanAttack("player",Unit) and distance < 50
 	 and isSafeToAttack(Unit) and not isCritter(Unit)
-		and (not GetUnitIsFriend(Unit,"player") or GetUnitIsUnit(thisUnit,"pet") or UnitCreator(thisUnit) == ObjectPointer("player")
+		and (not UnitIsFriend(Unit,"player") or UnitIsUnit(thisUnit,"pet") or UnitCreator(thisUnit) == ObjectPointer("player")
 			or GetObjectID(thisUnit) == 11492) and getLineOfSight("player", Unit)
 end
 function isValidUnit(Unit)
 	local hostileOnly = isChecked("Hostiles Only")
-	local playerTarget = GetUnitIsUnit(Unit,"target")
-	local reaction = GetUnitReaction(Unit,"player") or 10
+	local playerTarget = UnitIsUnit(Unit,"target")
 	local targeting = isTargeting(Unit)
-	if playerTarget and not enemyListCheck("target") then return false end
-	if not pause(true) and Unit ~= nil and (br.units[Unit] ~= nil or Unit == "target") and (not UnitIsTapDenied(Unit) or isDummy(Unit))
-		and reaction < 5 and (not hostileOnly or (hostileOnly and (reaction < 4 or targeting or isDummy(Unit) or (playerTarget and not GetUnitIsFriend(Unit,"player")))))
+	local reaction = UnitReaction(Unit,"player") or 10
+	if not pause(true) and Unit ~= nil and (br.units[Unit] ~= nil or enemyListCheck(Unit)) and (not UnitIsTapDenied(Unit) or isDummy(Unit))
+		and reaction < 5 and (not hostileOnly or (hostileOnly and (reaction < 4 or targeting or isDummy(Unit) or playerTarget)))
 	then
 		local instance = IsInInstance()
 		local distance = getDistance(Unit,"target")

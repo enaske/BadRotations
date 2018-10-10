@@ -31,12 +31,6 @@ local function createToggles()
         [2] = { mode = "Off", value = 2 , overlay = "Interrupts Disabled", tip = "No Interrupts will be used.", highlight = 0, icon = br.player.spell.muzzle }
     };
     CreateButton("Interrupt",4,0)
--- Harpoon Button 
-    HarpoonModes = {
-        [1] = { mode = "On", value = 1 , overlay = "Harpoon Enabled", tip = "Will cast Harpoon.", highlight = 1, icon = br.player.spell.harpoon },
-        [2] = { mode = "Off", value = 2 , overlay = "Harpoon Disabled", tip = "Will NOT cat Harpoon.", highlight = 0, icon = br.player.spell.harpoon }
-    };
-    CreateButton("Harpoon",5,0)
 end
 
 ---------------
@@ -55,8 +49,6 @@ local function createOptions()
             br.ui:createSpinner(section, "DPS Testing",  5,  5,  60,  5,  "|cffFFFFFFSet to desired time for test in minuts. Min: 5 / Max: 60 / Interval: 5")
         -- AoE
             br.ui:createSpinnerWithout(section, "Units To AoE", 3, 1, 10, 1, "|cffFFFFFFSet to desired units to start AoE at.")
-        -- Harpoon
-            br.ui:createCheckbox(section, "Harpoon - Opener")
         -- Opener
             br.ui:createDropdownWithout(section, "Opener", {"Always", "Cooldown", "Never"}, 1, "|cffFFFFFFSet when to use opener.")
         br.ui:checkSectionState(section)
@@ -157,8 +149,6 @@ local function runRotation()
         UpdateToggle("Cooldown",0.25)
         UpdateToggle("Defensive",0.25)
         UpdateToggle("Interrupt",0.25)
-        UpdateToggle("Harpoon",0.25)
-        br.player.mode.harpoon = br.data.settings[br.selectedSpec].toggles["Harpoon"]
 
 --------------
 --- Locals ---
@@ -320,7 +310,7 @@ local function runRotation()
                     PetStopAttack()
                     PetFollow()
                 end
-                -- if inCombat and (isValidUnit("target") or isDummy()) and getDistance("target") < 40 and not GetUnitIsUnit("target","pettarget") then
+                -- if inCombat and (isValidUnit("target") or isDummy()) and getDistance("target") < 40 and not UnitIsUnit("target","pettarget") then
                 --     -- Print("Pet is switching to your target.")
                 --     PetAttack()
                 -- end
@@ -577,7 +567,7 @@ local function runRotation()
             end
         -- Harpoon
             -- harpoon,if=talent.terms_of_engagement.enabled|azerite.up_close_and_personal.enabled
-            if cast.able.harpoon() and mode.harpoon == 1 and (talent.termsOfEngagement or traits.upCloseAndPersonal.active()) then
+            if cast.able.harpoon() and (talent.termsOfEngagement or traits.upCloseAndPersonal.active()) then
                 if cast.harpoon() then return end
             end
         -- Flanking Strike
@@ -682,7 +672,7 @@ local function runRotation()
             end
         -- Harpoon
             -- harpoon,if=talent.terms_of_engagement.enabled
-            if cast.able.harpoon() and mode.harpoon == 1 and (talent.termsOfEngagement) then
+            if cast.able.harpoon() and (talent.termsOfEngagement) then
                 if cast.harpoon() then return end
             end
         -- Serpent Sting
@@ -748,7 +738,7 @@ local function runRotation()
             end
         -- Harpoon
             -- harpoon,if=talent.terms_of_engagement.enabled|azerite.up_close_and_personal.enabled
-            if cast.able.harpoon() and mode.harpoon == 1 and (talent.termsOfEngagement or traits.upCloseAndPersonal.active()) then
+            if cast.able.harpoon() and (talent.termsOfEngagement or traits.upCloseAndPersonal.active()) then
                 if cast.harpoon() then return end
             end
         -- Mongoose Bite
@@ -862,9 +852,7 @@ local function runRotation()
         function actionList_Opener()
             local startTime = debugprofilestop()
         -- Harpoon
-            if isChecked("Harpoon - Opener") and mode.harpoon == 1 and cast.able.harpoon("target") and isValidUnit("target") 
-                and getDistance("target") >= 8 and getDistance("target") < 30 
-            then
+            if isChecked("Harpoon") and cast.able.harpoon("target") and isValidUnit("target") and getDistance("target") >= 8 and getDistance("target") < 30 then
                 if cast.harpoon("target") then return end
             end
 		-- Start Attack

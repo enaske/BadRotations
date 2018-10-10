@@ -18,12 +18,12 @@ function br.loader.loadProfiles()
     end
 
     local function rotationsDirectory()
-	    return GetWoWDirectory() .. '\\Interface\\AddOns\\BadRotations\\Rotations\\'
-	end
+        return GetWoWDirectory() .. '\\Interface\\AddOns\\BadRotations\\Rotations\\'
+    end
 
-	local function profiles(class, spec)
-	    return GetDirectoryFiles(rotationsDirectory() .. class .. '\\' .. spec .. '\\*.lua')
-	end
+    local function profiles(class, spec)
+        return GetDirectoryFiles(rotationsDirectory() .. class .. '\\' .. spec .. '\\*.lua')
+    end
 
     -- Search each Profile in the Spec Folder
     wipe(br.rotations)
@@ -62,42 +62,32 @@ function br.loader:new(spec,specName)
     -- Spells From Spell Table
     local function getSpellsForSpec(spec)
         local playerClass = select(2,UnitClass('player'))
-        local specSpells = br.lists.spells[playerClass][spec]
-        local sharedClassSpells = br.lists.spells[playerClass]["Shared"]
-        local sharedGlobalSpells = br.lists.spells["Shared"]["Shared"]
-        local function getSpells(spellTable)
-            -- Look through spell type subtables
-            for spellType, spellTypeTable in pairs(spellTable) do
-                -- Create spell type subtable in br.player.spell if not already there.
-                if self.spell[spellType] == nil then self.spell[spellType] = {} end
-                -- Look through spells for spell type
-                for spellRef, spellID in pairs(spellTypeTable) do
-                    -- Assign spell to br.player.spell for the spell type
-                    self.spell[spellType][spellRef] = spellID
-                    -- Assign active spells to Abilities Subtable and base br.player.spell 
-                    if not IsPassiveSpell(spellID)
-                        and (spellType == 'abilities' or spellType == 'traits' or spellType == 'talents')
-                    then
-                        if self.spell.abilities == nil then self.spell.abilities = {} end
-                        self.spell.abilities[spellRef] = spellID
-                        self.spell[spellRef] = spellID
+        for unitClass , classTable in pairs(br.lists.spells) do
+            if unitClass == playerClass or unitClass == 'Shared' then
+                for specID, specTable in pairs(classTable) do
+                    if specID == spec or specID == 'Shared' then
+                        for spellType, spellTypeTable in pairs(specTable) do
+                            if self.spell[spellType] == nil then self.spell[spellType] = {} end
+                            for spellRef, spellID in pairs(spellTypeTable) do
+                                self.spell[spellType][spellRef] = spellID
+                                if not IsPassiveSpell(spellID)
+                                    and (spellType == 'abilities' or spellType == 'traits' or spellType == 'talents')
+                                then
+                                    if self.spell.abilities == nil then self.spell.abilities = {} end
+                                    self.spell.abilities[spellRef] = spellID
+                                    self.spell[spellRef] = spellID
+                                    -- Ending the Race War!
+                                    if self.spell.abilities["racial"] == nil then
+                                        local racialID = getRacialID()
+                                        self.spell.abilities["racial"] = racialID
+                                        self.spell["racial"] = racialID
+                                    end
+                                end
+                            end
+                        end
                     end
                 end
             end
-        end
-
-        -- Spec Spells
-        getSpells(specSpells)
-        -- Shared Class Spells
-        getSpells(sharedClassSpells)
-        -- Shared Global Spells
-        getSpells(sharedGlobalSpells)
-        
-        -- Ending the Race War!
-        if self.spell.abilities["racial"] == nil then
-            local racialID = getRacialID()
-            self.spell.abilities["racial"] = racialID
-            self.spell["racial"] = racialID
         end
     end
     -- Update Talent Info
@@ -332,14 +322,17 @@ function br.loader:new(spec,specName)
                     -- return rake
                     return multiplier*RakeMultiplier
                 end
+                
             end
-            -- Assassination Bleeds
+
             if GetSpecializationInfo(GetSpecialization()) == 259 then
-                local multiplier = 1.00
-                if self.buff.stealth.exists() and self.talent.nightstalker then multiplier = 1.5 end
-                if (self.buff.stealth.exists() or self.buff.subterfuge.exists()) and self.talent.subterfuge then multiplier = 1.8 end
+                local multiplier = 0
+                if self.buff.stealth.exists() and self.talent.nightstalker and (dot == self.spell.debuffs.rupture or dot == self.spell.debuffs.garrote) then multiplier = 1.5 end
+                if (self.buff.stealth.exists() or self.buff.stealth2.exists() or self.buff.vanish.exists() or (self.buff.subterfuge.exists() and self.buff.subterfuge.remain() >= br.player.gcd)) and dot == self.spell.debuffs.garrote and self.talent.subterfuge then multiplier = 1.8 end
+                return multiplier
             end
             return 0
+
         end
 
         for k,v in pairs(self.spell.debuffs) do
@@ -391,6 +384,9 @@ function br.loader:new(spec,specName)
                 return getDebuffMinMax(k, range, debuffType, "max")
             end
             if spec == 103 or spec == 259 then
+                debuff.exsang = function(thisUnit)
+                        return debuff.exsa[thisUnit] or false
+                end
                 debuff.calc = function()
                     return self.getSnapshotValue(v)
                 end
@@ -671,6 +667,8 @@ function br.loader:new(spec,specName)
         if not UnitAffectingCombat("player") then self.updateOOC() end
         self.baseUpdate()
         self.getBleeds()
+        self.getBleeds()
+        self.getExsang()        
         -- Update Player Info on Init, Talent, and Level Change
         if br.updatePlayerInfo then getSpellsForSpec(spec); getTalentInfo(); getFunctions(); br.updatePlayerInfo = false end
         self.getToggleModes()
@@ -697,6 +695,23 @@ function br.loader:new(spec,specName)
             end
         end
     end
+
+        function self.getExsang()
+            if spec == 259 then
+                for k, v in pairs(self.debuff) do
+                    if k == "garrote" or k == "rupture" then
+                        if self.debuff[k].exsa == nil then self.debuff[k].exsa = {} end
+                        for l, w in pairs(self.debuff[k].exsa) do
+                            if not UnitAffectingCombat("player") or UnitIsDeadOrGhost(l) then
+                                self.debuff[k].exsa[l] = nil
+                            elseif not self.debuff[k].exists(l) then
+                                self.debuff[k].exsa[l] = false
+                            end 
+                        end
+                    end
+                end
+            end
+        end    
 
 ---------------
 --- TOGGLES ---
@@ -882,6 +897,8 @@ function br.loader:new(spec,specName)
             return 0
         end
     end
+
+
 
     function BleedTarget()
         return (br.player.debuff.garrote.exists("target") and 1 or 0) + (br.player.debuff.rupture.exists("target") and 1 or 0) + (br.player.debuff.internalBleeding.exists("target") and 1 or 0)

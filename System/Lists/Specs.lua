@@ -48,7 +48,7 @@ br.lists.spec = {
 	SHAMAN 		= {
 		Elemental 		= 262,
 		Enhancement 	= 263,
-		Restoration 	= 264,
+		Restoration 	= 267,
 	},
 	WARLOCK 	= {
 		Affliction 		= 265,

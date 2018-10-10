@@ -246,7 +246,6 @@ function br.read.commonReaders()
 	---------------------------
 	--[[ Combat Log Reader --]]
 	local superReaderFrame = CreateFrame('Frame')
-	superReaderFrame:RegisterEvent("CHAT_MSG_ADDON")
 	superReaderFrame:RegisterEvent("PLAYER_TOTEM_UPDATE")
 	superReaderFrame:RegisterEvent("UNIT_SPELLCAST_START")
 	superReaderFrame:RegisterEvent("UNIT_SPELLCAST_SENT")
@@ -344,7 +343,7 @@ function br.read.commonReaders()
 			local SpellID 		= select(5,...)
 			if botCast == true then botCast = false end
 	        if sourceName ~= nil then
-	            if GetUnitIsUnit(sourceName,"player") then
+	            if UnitIsUnit(sourceName,"player") then
 
 	            end
 	        end
@@ -490,20 +489,12 @@ function br.read.commonReaders()
 			local eID = select(1,...)
 			if eID and eID == 2141 then -- MOTHER Uldir fight
 				_brMotherFight = true
-			end
+			end 
 		end
 		if event == "ENCOUNTER_END" then
 			local eID = select(1,...)
 			if eID and eID == 2141 then -- MOTHER Uldir fight
 				_brMotherFight = false
-			end
-		end
-		if event == "CHAT_MSG_ADDON" then
-			local prefix, message = ...
-			if prefix == "D4" and string.find(message, "PT") then
-					_brPullTimer = GetTime() + tonumber(string.sub(message, 4, 5))
-			elseif prefix == "BigWigs" and string.find(message, "Pull") then
-					_brPullTimer = GetTime() + tonumber(string.sub(message, 8, 9))
 			end
 		end
 	end

@@ -206,7 +206,7 @@ function inLoSHealer()
 	end
 	for i = 1, #br.friend do
 		local thisUnit = br.friend[i].unit
-		if not GetUnitIsUnit(thisUnit,"player") and  UnitGroupRolesAssigned(thisUnit) == "HEALER" then
+		if not UnitIsUnit(thisUnit,"player") and  UnitGroupRolesAssigned(thisUnit) == "HEALER" then
 			drawHealers(thisUnit)
 		end
 	end
@@ -255,20 +255,18 @@ function getUnitsInRect(width,length, showLines, hp)
 	end
 
 	local unitCounter = 0
-	local UnitsInRect = {}
+	local UnitsInRect = UnitsInRect or {}
 	table.wipe(UnitsInRect)
 	for i = 1, #br.friend do
 		local thisUnit = br.friend[i]
-		if GetUnitExists(thisUnit.unit) and thisUnit.hp <= hp and not UnitIsDeadOrGhost(thisUnit.unit) then
-			local tX, tY = thisUnit.x, thisUnit.y
-			if tX and tY then
-				if isInside(tX,tY,nlX,nlY,nrX,nrY,frX,frY) then
-					if showLines then
-						LibDraw.Circle(tX, tY, playerZ, UnitBoundingRadius(thisUnit.unit))
-					end
-					unitCounter = unitCounter + 1
-					table.insert(UnitsInRect,thisUnit)
+		if thisUnit.hp <= hp and not UnitIsDeadOrGhost(thisUnit.unit) then
+			local tX, tY = GetObjectPosition(thisUnit.unit)
+			if isInside(tX,tY,nlX,nlY,nrX,nrY,frX,frY) then
+				if showLines then
+					LibDraw.Circle(tX, tY, playerZ, UnitBoundingRadius(thisUnit.unit))
 				end
+				unitCounter = unitCounter + 1
+				table.insert(UnitsInRect,thisUnit)
 			end
 		end
 	end
@@ -288,7 +286,7 @@ function getUnitsInCone(length,angle,hp)
         local thisUnit = br.friend[i].unit
 		if thisUnit.hp <= hp then
 			if br.friend[i].distance <= Length then			
-		        if not GetUnitIsUnit(thisUnit,"player") and (isDummy(thisUnit) or GetUnitIsFriend(thisUnit,"player")) then
+		        if not UnitIsUnit(thisUnit,"player") and (isDummy(thisUnit) or UnitIsFriend(thisUnit,"player")) then
 		            local unitX, unitY, unitZ = GetObjectPosition(thisUnit)
 		            if playerX and unitX then
 		                local angleToUnit = getAngles(playerX,playerY,playerZ,unitX,unitY,unitZ)

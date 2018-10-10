@@ -18,7 +18,7 @@ function castAoEHeal(spellID,numUnits,missingHP,rangeValue)
 			-- i start a second iteration where i scan unit ranges from one another.
 			for j = 1,#br.friend do
 				-- i make sure i dont compute unit range to hisself.
-				if not GetUnitIsUnit(br.friend[i].unit,br.friend[j].unit) then
+				if not UnitIsUnit(br.friend[i].unit,br.friend[j].unit) then
 					-- table the units
 					br.friend[i].distanceTable[j] = { distance = getDistance(br.friend[i].unit,br.friend[j].unit),unit = br.friend[j].unit,hp = br.friend[j].hp }
 				end
@@ -176,25 +176,6 @@ Tenth 		noCast			True to return True/False instead of casting spell.
 function castSpell(Unit,SpellID,FacingCheck,MovementCheck,SpamAllowed,KnownSkip,DeadCheck,DistanceSkip,usableSkip,noCast)
 	if GetObjectExists(Unit) --and betterStopCasting(SpellID) ~= true
 		and (not UnitIsDeadOrGhost(Unit) or DeadCheck) then
-		--Quaking helper
-		if getOptionCheck("Quaking Helper") then
-			--Detect channels
-			local channeledSpell = false
-			local costTable = GetSpellPowerCost(SpellID)
-			for _, costInfo in pairs(costTable) do
-				if costInfo.costPerSec > 0 then
-					channeledSpell = true
-				end
-			end
-			-- Quake check
-			local quakeRemain = getDebuffRemain("player", 240448)
-			if quakeRemain > 0 then
-				local spellCastTime = select(4,GetSpellInfo(SpellID))
-				if (spellCastTime > 0 and quakeRemain <= ((spellCastTime+300)/1000)) or (spellCastTime == 0 and channeledSpell and quakeRemain < 1.5) then
-					return false
-				end
-			end
-		end
 		-- we create an usableSkip for some specific spells like hammer of wrath aoe mode
 		if usableSkip == nil then usableSkip = false end
 		-- stop if not enough power for that spell
@@ -211,8 +192,8 @@ function castSpell(Unit,SpellID,FacingCheck,MovementCheck,SpamAllowed,KnownSkip,
 		if spellRange == nil or (spellRange < 4 and DistanceSkip==false) then spellRange = 4 end
 		if DistanceSkip == true then spellRange = 40 end
 		-- Check unit,if it's player then we can skip facing
-		if (Unit == nil or GetUnitIsUnit("player",Unit)) -- Player
-			or (Unit ~= nil and GetUnitIsFriend("player",Unit))  -- Ally
+		if (Unit == nil or UnitIsUnit("player",Unit)) -- Player
+			or (Unit ~= nil and UnitIsFriend("player",Unit))  -- Ally
 			or IsHackEnabled("AlwaysFacing")
 		then
 			FacingCheck = true
@@ -230,7 +211,7 @@ function castSpell(Unit,SpellID,FacingCheck,MovementCheck,SpamAllowed,KnownSkip,
 				if SpamAllowed == false then
 					-- get our last/current cast
 					if timersTable == nil or (timersTable ~= nil and (timersTable[SpellID] == nil or timersTable[SpellID] <= GetTime() -0.6)) then
-						if (FacingCheck == true or getFacing("player",Unit) == true) and (GetUnitIsUnit("player",Unit) or br.units[Unit] ~= nil or getLineOfSight("player",Unit) == true) then
+						if (FacingCheck == true or getFacing("player",Unit) == true) and (UnitIsUnit("player",Unit) or getLineOfSight("player",Unit) == true) then
 							if noCast then
 								return true
 							else
@@ -254,7 +235,7 @@ function castSpell(Unit,SpellID,FacingCheck,MovementCheck,SpamAllowed,KnownSkip,
 							end
 						end
 					end
-				elseif (FacingCheck == true or getFacing("player",Unit) == true) and (GetUnitIsUnit("player",Unit) or br.units[Unit] ~= nil or getLineOfSight("player",Unit) == true) then
+				elseif (FacingCheck == true or getFacing("player",Unit) == true) and (UnitIsUnit("player",Unit) or getLineOfSight("player",Unit) == true) then
 					if noCast then
 						return true
 					else
@@ -331,8 +312,8 @@ function castSpellMacro(Unit,SpellID,FacingCheck,MovementCheck,SpamAllowed,Known
 		if spellRange == nil or (spellRange < 4 and DistanceSkip==false) then spellRange = 4 end
 		if DistanceSkip == true then spellRange = 40 end
 		-- Check unit,if it's player then we can skip facing
-		if (Unit == nil or GetUnitIsUnit("player",Unit)) or -- Player
-			(Unit ~= nil and GetUnitIsFriend("player",Unit)) then  -- Ally
+		if (Unit == nil or UnitIsUnit("player",Unit)) or -- Player
+			(Unit ~= nil and UnitIsFriend("player",Unit)) then  -- Ally
 			FacingCheck = true
 		elseif isSafeToAttack(Unit) ~= true then -- enemy
 			return false
@@ -348,7 +329,7 @@ function castSpellMacro(Unit,SpellID,FacingCheck,MovementCheck,SpamAllowed,Known
 				if SpamAllowed == false then
 					-- get our last/current cast
 					if timersTable == nil or (timersTable ~= nil and (timersTable[SpellID] == nil or timersTable[SpellID] <= GetTime() -0.6)) then
-						if (FacingCheck == true or getFacing("player",Unit) == true) and (GetUnitIsUnit("player",Unit) or getLineOfSight("player",Unit) == true) then
+						if (FacingCheck == true or getFacing("player",Unit) == true) and (UnitIsUnit("player",Unit) or getLineOfSight("player",Unit) == true) then
 							if noCast then
 								return true
 							else
@@ -366,7 +347,7 @@ function castSpellMacro(Unit,SpellID,FacingCheck,MovementCheck,SpamAllowed,Known
 							end
 						end
 					end
-				elseif (FacingCheck == true or getFacing("player",Unit) == true) and (GetUnitIsUnit("player",Unit) or getLineOfSight("player",Unit) == true) then
+				elseif (FacingCheck == true or getFacing("player",Unit) == true) and (UnitIsUnit("player",Unit) or getLineOfSight("player",Unit) == true) then
 					if noCast then
 						return true
 					else
@@ -616,7 +597,7 @@ function createCastFunction(thisUnit,debug,minUnits,effectRng,spellID,index)
                     	castDebug()
                     	return castSpell(thisUnit,spellCast,false,false,false,true,false,true,true,false)
                     end
-                elseif debug == "dead" and UnitIsPlayer(thisUnit) and UnitIsDeadOrGhost(thisUnit) and GetUnitIsFriend(thisUnit,"player") then
+                elseif debug == "dead" and UnitIsPlayer(thisUnit) and UnitIsDeadOrGhost(thisUnit) and UnitIsFriend(thisUnit,"player") then
                     castDebug()
                     return castSpell(thisUnit,spellCast,false,false,false,true,true,true,true,false)
                 elseif debug == "norm" and hasEnemies then

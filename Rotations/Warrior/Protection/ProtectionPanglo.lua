@@ -163,7 +163,7 @@ local function runRotation()
         local debuff                                        = br.player.debuff
         local enemies                                       = br.player.enemies
         local falling, swimming, flying, moving             = getFallTime(), IsSwimming(), IsFlying(), GetUnitSpeed("player")>0
-        local friendly                                      = friendly or GetUnitIsFriend("target", "player")
+        local friendly                                      = friendly or UnitIsFriend("target", "player")
         local gcd                                           = br.player.gcd
         local hasMouse                                      = GetObjectExists("mouseover")
         local healPot                                       = getHealthPot()
@@ -285,7 +285,7 @@ local function runRotation()
                 for i=1, #enemies.yards40 do
                     thisUnit = enemies.yards40[i]
                     unitDist = getDistance(thisUnit)
-                    targetMe = GetUnitIsUnit("player",thisUnit) or false
+                    targetMe = UnitIsUnit("player",thisUnit) or false
                     if canInterrupt(thisUnit,getOptionValue("InterruptAt")) then
                     -- Pummel
                         if isChecked("Pummel") and unitDist < 5 then
@@ -359,7 +359,7 @@ local function runRotation()
         -- Charge
                 -- charge
                 if (cd.heroicLeap.remain() > 0 and cd.heroicLeap.remain() < 43) or level < 26 then
-                    if isValidUnit("target") or (GetUnitIsFriend("target") and level >= 28) then
+                    if isValidUnit("target") or (UnitIsFriend("target") and level >= 28) then
                         if level < 28 then
                             if cast.charge("target") then return end
                         else

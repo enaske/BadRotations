@@ -65,8 +65,6 @@ local function createOptions()
             br.ui:createCheckbox(section, "Fel Rush Only In Melee")
         -- Fel Rush After Vengeful Retreat
             br.ui:createCheckbox(section, "Auto Fel Rush After Retreat")
-        -- Throw Glaive 
-            br.ui:createCheckbox(section, "Throw Glaive")
         -- Vengeful Retreat
             br.ui:createCheckbox(section, "Vengeful Retreat")
         -- Glide Fall Time
@@ -535,7 +533,7 @@ local function runRotation()
             end
         -- Throw Glaive
             -- throw_glaive,if=buff.out_of_range.up
-            if isChecked("Throw Glaive") and cast.able.throwGlaive() and getDistance(units.dyn30) > 8 then
+            if cast.able.throwGlaive() and getDistance(units.dyn30) > 8 then
                 if cast.throwGlaive(nil,"aoe",1,10) then return end
             end
         -- Fel Rush
@@ -552,7 +550,7 @@ local function runRotation()
         --     end
         -- Throw Glaive
             -- throw_glaive,if=talent.demon_blades.enabled
-            if isChecked("Throw Glaive") and cast.able.throwGlaive() and talent.demonBlades then
+            if cast.able.throwGlaive() and talent.demonBlades then
                 if cast.throwGlaive(nil,"aoe",1,10) then return end
             end
         end -- End Action List - Demonic
@@ -597,8 +595,7 @@ local function runRotation()
             end
         -- Eye Beam
             -- eye_beam,if=active_enemies>1&(!raid_event.adds.exists|raid_event.adds.up)&!variable.waiting_for_momentum
-            if cast.able.eyeBeam() and enemies.yards8r > 0 and not moving and not waitForMomentum and (not talent.momentum or buff.momentum.exists())
-                --and (ttd(units.dyn8) > 2 or isDummy(units.dyn8))
+            if cast.able.eyeBeam() and enemies.yards8r > 0 and not moving and not waitForMomentum --and (ttd(units.dyn8) > 2 or isDummy(units.dyn8))
                 -- and ((getOptionValue("Eye Beam Usage") == 1 and mode.rotation == 1 and enemies.yards8r > 1)
                 --     or (getOptionValue("Eye Beam Usage") == 2 and mode.rotation == 1 and enemies.yards8r >= getOptionValue("Units To AoE"))
                 --     or (mode.rotation == 2 and enemies.yards8r > 0))
@@ -629,8 +626,7 @@ local function runRotation()
             end
         -- Eye Beam
             -- eye_beam,if=!talent.blind_fury.enabled&!variable.waiting_for_dark_slash&raid_event.adds.in>cooldown
-            if cast.able.eyeBeam() and enemies.yards8r > 0 and not moving and not talent.blindFury and not waitForDarkSlash and (not talent.momentum or buff.momentum.exists())
-                --and (ttd(units.dyn8) > 2 or isDummy(units.dyn8))
+            if cast.able.eyeBeam() and enemies.yards8r > 0 and not moving and not talent.blindFury and not waitForDarkSlash --and (ttd(units.dyn8) > 2 or isDummy(units.dyn8))
                 -- and ((getOptionValue("Eye Beam Usage") == 1 and mode.rotation == 1 and enemies.yards8r > 0)
                 --     or (getOptionValue("Eye Beam Usage") == 2 and mode.rotation == 1 and enemies.yards8r >= getOptionValue("Units To AoE"))
                 --     or (mode.rotation == 2 and enemies.yards8r > 0))
@@ -654,8 +650,7 @@ local function runRotation()
             end
         -- Eye Beam
             -- eye_beam,if=talent.blind_fury.enabled&raid_event.adds.in>cooldown
-            if cast.able.eyeBeam() and enemies.yards8r > 0 and not moving and talent.blindFury and (not talent.momentum or buff.momentum.exists())
-                --and (ttd(units.dyn8) > 2 or isDummy(units.dyn8))
+            if cast.able.eyeBeam() and enemies.yards8r > 0 and not moving and talent.blindFury --and (ttd(units.dyn8) > 2 or isDummy(units.dyn8))
                 -- and ((getOptionValue("Eye Beam Usage") == 1 and mode.rotation == 1 and enemies.yards8r > 0)
                 --     or (getOptionValue("Eye Beam Usage") == 2 and mode.rotation == 1 and enemies.yards8r >= getOptionValue("Units To AoE"))
                 --     or (mode.rotation == 2 and enemies.yards8r > 0))
@@ -696,7 +691,7 @@ local function runRotation()
         --     end
         -- Throw Glaive
             -- throw_glaive,if=talent.demon_blades.enabled
-            if isChecked("Throw Glaive") and cast.able.throwGlaive() and talent.demonBlades then
+            if cast.able.throwGlaive() and talent.demonBlades then
                 if cast.throwGlaive(nil,"aoe",1,10) then return end
             end
         end -- End Action List - Normal
@@ -733,9 +728,9 @@ local function runRotation()
 
                 end -- End Pre-Pull
                 if isValidUnit("target") then
-                    if GetUnitReaction("target","player") < 4 then
+                    if UnitReaction("target","player") < 4 then
             -- Throw Glaive
-                        if isChecked("Throw Glaive") and cast.able.throwGlaive("target") and #enemies.get(10,"target",true) == 1 then
+                        if cast.able.throwGlaive("target") and #enemies.get(10,"target",true) == 1 then
                             if cast.throwGlaive("target","aoe") then return end
                         end
             -- Torment

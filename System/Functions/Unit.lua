@@ -20,21 +20,6 @@ function GetUnit(Unit)
 	end
 	return nil
 end
-
-function GetUnitIsUnit(Unit, otherUnit)
-	if not GetUnitIsVisible(Unit) or not GetUnitIsVisible(otherUnit) then return false end
-	return UnitIsUnit(Unit,otherUnit)
-end
-
-function GetUnitReaction(Unit,otherUnit)
-	if not UnitIsVisible(Unit) or not UnitIsVisible(otherUnit) then return 10 end
-	 return UnitReaction(Unit,otherUnit)
-end
-
-function GetUnitIsFriend(Unit, otherUnit)
-	if not GetUnitIsVisible(Unit) or not GetUnitIsVisible(otherUnit) then return false end
-	return UnitIsFriend(Unit,otherUnit)
-end
 function GetUnitExists(Unit)
 	if Unit == nil then return false end
 	return UnitExists(Unit)
@@ -302,7 +287,7 @@ function isInstanceBoss(unit)
 		end
 		for i = 1, 5 do
 			local bossNum = "boss"..i
-			if GetUnitIsUnit(bossNum,unit) then return true end
+			if UnitIsUnit(bossNum,unit) then return true end
 		end
 	end
 	return false

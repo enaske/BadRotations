@@ -55,7 +55,7 @@ function cacheOM()
 	end
 	-- Remove entries that are no longer valid
 	for thisEntry, thisUnit in pairs(br.om) do
-		if not GetUnitIsVisible(thisUnit) or GetUnitReaction("player",thisUnit) >= 5 or getDistance(thisUnit) >= 50 then
+		if not GetUnitIsVisible(thisUnit) or UnitReaction("player",thisUnit) >= 5 or getDistance(thisUnit) >= 50 then
 			br.om[thisEntry] = nil
 		end
 	end
@@ -72,7 +72,7 @@ function cacheOM()
 			local thisUnit = GetObjectWithIndex(i)
 			if br.om[thisUnit] == nil and ObjectIsUnit(thisUnit) then
 				if GetUnitIsVisible(thisUnit) and getDistance(thisUnit) < 50
-					and (GetUnitReaction("player",thisUnit) < 5 or UnitCreator(thisUnit) == playerObject)
+					and (UnitReaction("player",thisUnit) < 5 or UnitCreator(thisUnit) == playerObject)
 				then
 					br.debug.cpu.enemiesEngine.objects.targets = br.debug.cpu.enemiesEngine.objects.targets + 1
 					br.om[thisUnit]	= thisUnit
@@ -303,7 +303,7 @@ function dynamicTarget(range,facing)
 		bestUnit = "target"
 	end
 	if (UnitIsDeadOrGhost("target")	or (not UnitExists("target") and hasThreat(bestUnit))
-		or ((isChecked("Target Dynamic Target") and UnitExists("target")) and not GetUnitIsUnit(bestUnit,"target")))
+		or ((isChecked("Target Dynamic Target") and UnitExists("target")) and not UnitIsUnit(bestUnit,"target")))
 	then
 		TargetUnit(bestUnit)
 	end
@@ -317,7 +317,7 @@ local function targetNearestEnemy(range)
 	for k,v in pairs(getEnemies("player",range)) do
 		local thisUnit = br.enemy[v]
 		if not UnitIsDeadOrGhost(thisUnit.unit) and getDistance("player",thisUnit.unit) <= range and ObjectIsFacing("player",thisUnit.unit) and getFacing("player", thisUnit.unit) and UnitInPhase(thisUnit.unit) then
-			if not isChecked("Hostiles Only") or (getOptionCheck("Hostiles Only") and GetUnitReaction(thisUnit.unit,"player") <= 2 or (UnitExists("pet") and GetUnitReaction(thisUnit.unit,"pet") <= 2)) then
+			if not isChecked("Hostiles Only") or (getOptionCheck("Hostiles Only") and UnitReaction(thisUnit.unit,"player") <= 2 or (UnitExists("pet") and UnitReaction(thisUnit.unit,"pet") <= 2)) then
 				bestUnit = thisUnit.unit
 				if isChecked("Target Dynamic Target") and bestUnit ~= nil and (getOptionValue("Dynamic Targetting") == 2 or (getOptionValue("Dynamic Targetting") == 1 and inCombat)) then
 					TargetUnit(bestUnit)
@@ -460,30 +460,19 @@ function getEnemiesInRect(width,length,showLines,checkNoCombat)
 	local nlX, nlY, nrX, nrY, frX, frY = getRect(width,length,showLines)
 	local enemyCounter = 0
 	local enemiesTable = getEnemies("player",length,checkNoCombat)
-	local enemiesInRect = enemiesInRect or {}
 	if #enemiesTable > 0 then
-		table.wipe(enemiesInRect)
 		for i = 1, #enemiesTable do
 			local thisUnit = enemiesTable[i]
---			if thisUnit ~= "target" then
-				local tX, tY = GetObjectPosition(thisUnit)
---			end
-			if tX and tY then
-				if isInside(tX,tY,nlX,nlY,nrX,nrY,frX,frY) then
-					if showLines then
-						LibDraw.Circle(tX, tY, playerZ, UnitBoundingRadius(thisUnit))
-					end
-					enemyCounter = enemyCounter + 1
-					table.insert(enemiesInRect,thisUnit)
+			local tX, tY, tZ = GetObjectPosition(thisUnit)
+			if isInside(tX,tY,nlX,nlY,nrX,nrY,frX,frY) then
+				if showLines then
+					LibDraw.Circle(tX, tY, playerZ, UnitBoundingRadius(thisUnit))
 				end
+				enemyCounter = enemyCounter + 1
 			end
 		end
 	end
-	if #enemiesInRect ~= 0 then
-		return enemyCounter, enemiesInRect
-	else
-		return enemyCounter
-	end
+	return enemyCounter
 end
 
 -- local function intersects(circle, rect)
@@ -530,7 +519,7 @@ end
 -- returns true if Unit is a valid enemy
 function getSanity(unit)
 	if  GetUnitIsVisible(unit) == true and getCreatureType(unit) == true
-			and ((UnitCanAttack(unit, "player") == true or not GetUnitIsFriend(unit,"player") or isDummy(unit)) and getLineOfSight(unit, "player"))
+			and ((UnitCanAttack(unit, "player") == true or not UnitIsFriend(unit,"player") or isDummy(unit)) and getLineOfSight(unit, "player"))
 			and UnitIsDeadOrGhost(unit) == false
 	then
 		return true
@@ -549,7 +538,7 @@ function getUnitCoeficient(unit)
 		if distance < 50 then
 			local unitHP = getHP(unit)
 			-- if its our actual target we give it a bonus
-			if GetUnitIsUnit("target",unit) == true then
+			if UnitIsUnit("target",unit) == true then
 				coef = coef + 1
 			end
 			-- if wise target checked, we look for best target by looking to the lowest or highest hp, otherwise we look for target
@@ -559,9 +548,9 @@ function getUnitCoeficient(unit)
 					coef = unitHP
 				elseif getOptionValue("Wise Target") == 3 then -- abs Highest
 					coef = UnitHealth(unit)
-				elseif getOptionValue("Wise Target") == 4 then -- Nearest
+				elseif getOptionValue("Wise Target") == 4 then -- Furthest
 					coef = 100 - distance
-				elseif getOptionValue("Wise Target") == 5 then -- Furthest
+				elseif getOptionValue("Wise Target") == 5 then -- Nearest
 					coef = distance
 				else 										   -- Lowest
 					-- if lowest is selected
@@ -577,7 +566,7 @@ function getUnitCoeficient(unit)
 			if getOptionCheck("Tank Threat") then
 				local threat = UnitThreatSituation("player",unit) or -1
 				if select(6, GetSpecializationInfo(GetSpecialization())) == "TANK" and threat < 3 and unitHP > 10 then
-					coef = coef + 100 - threat
+					coef = coef + 100
 				end
 			end
 			-- if user checked burn target then we add the value otherwise will be 0

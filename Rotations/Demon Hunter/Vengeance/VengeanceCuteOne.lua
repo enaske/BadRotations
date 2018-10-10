@@ -63,10 +63,8 @@ local function createOptions()
             br.ui:createCheckbox(section,"Torment")
 		-- Consume Magic
             br.ui:createCheckbox(section,"Consume Magic")
-		-- Fel Devestation
+		-- Consume Magic
             br.ui:createCheckbox(section,"Fel Devastation")
-        -- Throw Glaive 
-            br.ui:createCheckbox(section,"Throw Glaive")
         br.ui:checkSectionState(section)
     -- Cooldown Options
         section = br.ui:createSection(br.ui.window.profile, "Cooldowns")
@@ -216,26 +214,26 @@ local function runRotation()
 		local function actionList_Defensive()
 			if useDefensive() then
         -- Soul Barrier
-                if isChecked("Soul Barrier") and inCombat and cast.able.soulBarrier() and php < getOptionValue("Soul Barrier") then
+                if isChecked("Soul Barrier") and cast.able.soulBarrier() and php < getOptionValue("Soul Barrier") then
                     if cast.soulBarrier() then return end
                 end
         -- Demon Spikes
                 -- demon_spikes
-                if isChecked("Demon Spikes") and inCombat and cast.able.demonSpikes() and charges.demonSpikes.count() > getOptionValue("Hold Demon Spikes") and php <= getOptionValue("Demon Spikes") then
+                if isChecked("Demon Spikes") and cast.able.demonSpikes() and charges.demonSpikes.count() > getOptionValue("Hold Demon Spikes") and php <= getOptionValue("Demon Spikes") then
                     if (charges.demonSpikes.count() == 2 or not buff.demonSpikes.exists()) and not debuff.fieryBrand.exists(units.dyn5) and not buff.metamorphosis.exists() then
                         if cast.demonSpikes() then return end
                     end
                 end
         -- Metamorphosis
 				-- metamorphosis
-				if isChecked("Metamorphosis") and inCombat and cast.able.metamorphosis() and not buff.demonSpikes.exists()
+				if isChecked("Metamorphosis") and cast.able.metamorphosis() and not buff.demonSpikes.exists()
                     and not debuff.fieryBrand.exists(units.dyn5) and not buff.metamorphosis.exists() and php <= getOptionValue("Metamorphosis")
                 then
 					if cast.metamorphosis() then return end
 				end
         -- Fiery Brand
                 -- fiery_brand
-                if isChecked("Fiery Brand") and inCombat and php <= getOptionValue("Fiery Brand") then
+                if isChecked("Fiery Brand") and php <= getOptionValue("Fiery Brand") then
                     if not buff.demonSpikes.exists() and not buff.metamorphosis.exists() then
                         if cast.fieryBrand() then return end
                     end
@@ -463,7 +461,7 @@ local function runRotation()
 	                if cast.shear() then return end
                 end
 				-- actions.normal+=/throw_glaive
-                if isChecked("Throw Glaive") and cast.able.throwGlaive() then
+                if cast.able.throwGlaive() then
                     if cast.throwGlaive() then return end
                 end
 			end --End In Combat

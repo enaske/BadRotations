@@ -8,8 +8,8 @@ function getDistance(Unit1,Unit2,option)
     if Unit1 == nil or Unit2 == nil then return 100 end
     if option == nil then option = "none" end
     -- Check if objects exists and are visible
-    if (GetUnitIsUnit(Unit1,"player") or (GetObjectExists(Unit1) and GetUnitIsVisible(Unit1) == true))
-        and (GetUnitIsUnit(Unit2,"player") or (GetObjectExists(Unit2) and GetUnitIsVisible(Unit2) == true))
+    if (UnitIsUnit(Unit1,"player") or (GetObjectExists(Unit1) and GetUnitIsVisible(Unit1) == true))
+        and (UnitIsUnit(Unit2,"player") or (GetObjectExists(Unit2) and GetUnitIsVisible(Unit2) == true))
     then
         -- Modifier for Balance Affinity range change (Druid - Not Balance)
         local rangeMod = 0
@@ -36,16 +36,18 @@ function getDistance(Unit1,Unit2,option)
             IfSourceAndTargetAreRunning = 0
         end
 
-        local dist = math.sqrt(((X2-X1)^2) + ((Y2-Y1)^2) + ((Z2-Z1)^2)) - (PlayerCombatReach + TargetCombatReach) - rangeMod
+        local dist = math.sqrt(((X2-X1)^2) + ((Y2-Y1)^2) + ((Z2-Z1)^2)) - (PlayerCombatReach + TargetCombatReach) - rangeMod 
         local dist2 = dist + 0.03 * ((13 - dist) / 0.13)
         local dist3 = dist + 0.05 * ((8 - dist) / 0.15) + 1
-        local dist4 = dist + (PlayerCombatReach + TargetCombatReach)
-        local meleeRange = max(5, PlayerCombatReach + TargetCombatReach + MeleeCombatReachConstant + IfSourceAndTargetAreRunning)
+        local dist4 = dist + (PlayerCombatReach + TargetCombatReach) - 1
+        local meleeRange = max(4.5, PlayerCombatReach + TargetCombatReach + MeleeCombatReachConstant + IfSourceAndTargetAreRunning)
+
+        if br.player ~= nil then if br.player.talent.acrobaticStrikes then meleeRange = max(7.5, PlayerCombatReach + TargetCombatReach + MeleeCombatReachConstant + IfSourceAndTargetAreRunning) end end
         if option == "dist" then return dist end
         if option == "dist2" then return dist2 end
         if option == "dist3" then return dist3 end
         if option == "dist4" then return dist4 end
-        if GetSpecializationInfo(GetSpecialization()) == 255 then
+        if GetSpecializationInfo(GetSpecialization()) == 255 or GetSpecializationInfo(GetSpecialization()) == 260 or GetSpecializationInfo(GetSpecialization()) == 259 or GetSpecializationInfo(GetSpecialization()) == 261 then
             if dist > meleeRange then
                 currentDist = dist
             else
@@ -126,7 +128,7 @@ function getTotemDistance(Unit1)
   if GetUnitIsVisible(Unit1) then
     -- local objectCount = GetObjectCount() or 0
     for i = 1,GetObjectCount() do
-      if GetUnitIsUnit(UnitCreator(ObjectWithIndex(i)), "Player") and (UnitName(ObjectWithIndex(i)) == "Searing Totem" or UnitName(ObjectWithIndex(i)) == "Magma Totem") then
+      if UnitIsUnit(UnitCreator(ObjectWithIndex(i)), "Player") and (UnitName(ObjectWithIndex(i)) == "Searing Totem" or UnitName(ObjectWithIndex(i)) == "Magma Totem") then
         X2,Y2,Z2 = GetObjectPosition(GetObjectIndex(i))
       end
     end
@@ -153,7 +155,7 @@ end
 function isSafeToAoE(spellID,Unit,effectRng,minUnits,aoeType)
     local maxRange = select(6,GetSpellInfo(spellID))
     if effectRng == nil then effectRng = 5 end
-    if maxRange == nil or maxRange == 0 then maxRange = tonumber(effectRng) else maxRange = tonumber(maxRange) end
+    if maxRange == nil or maxRange == 0 then maxRange = effectRng end
     if minUnits == nil then minUnits = 1 end
     if aoeType == "rect" then
         enemiesValid    = getEnemiesInRect(effectRng,maxRange,false)
@@ -162,8 +164,8 @@ function isSafeToAoE(spellID,Unit,effectRng,minUnits,aoeType)
         enemiesValid    = getEnemiesInCone(effectRng,maxRange,false)
         enemiesAll      = getEnemiesInCone(effectRng,maxRange,false,true)
     else
-        enemiesValid    = #getEnemies(Unit,effectRng)
-        enemiesAll      = #getEnemies(Unit,effectRng,true)
+        enemiesValid    = #getEnemies(Unit,maxRange)
+        enemiesAll      = #getEnemies(Unit,maxRange,true)
     end
     if isChecked("Safe Damage Check") then
         return enemiesValid >= minUnits and enemiesValid >= enemiesAll

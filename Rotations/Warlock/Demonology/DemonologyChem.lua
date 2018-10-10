@@ -162,7 +162,7 @@ local function runRotation()
         local enemies                                       = br.player.enemies
         local falling, swimming, flying, moving             = getFallTime(), IsSwimming(), IsFlying(), GetUnitSpeed("player")>0
         local flaskBuff                                     = getBuffRemain("player",br.player.flask.wod.buff.agilityBig)
-        local friendly                                      = friendly or GetUnitIsFriend("target", "player")
+        local friendly                                      = friendly or UnitIsFriend("target", "player")
         local gcd                                           = br.player.gcd
         local grimoirePet                                   = getOptionValue("Grimoire of Service - Pet")
         local hasMouse                                      = GetObjectExists("mouseover")
@@ -544,7 +544,7 @@ local function runRotation()
                             DSB1 = true
                         end
                 -- Pet Attack
-                        if not GetUnitIsUnit("pettarget","target") then
+                        if not UnitIsUnit("pettarget","target") then
                             PetAttack()
                         end
                 -- Doom
@@ -903,7 +903,7 @@ local function runRotation()
     ---------------------------
                 if getOptionValue("APL Mode") == 1 then
         -- Pet Attack
-                    if not GetUnitIsUnit("pettarget","target") then
+                    if not UnitIsUnit("pettarget","target") then
                         PetAttack()
                     end
 
